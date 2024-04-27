@@ -1,42 +1,49 @@
-/******* Change Box Model ***************/
+/* Change Box Model */
 *,
 *:before,
 *:after {
   box-sizing: border-box;
 }
 
+/* Body styles */
 body {
   background: url('../images/site/checkerboard.jpg') center / 500px 375px repeat;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Open Sans", sans-serif; /* Primary font */
 }
 
+/* Flexbox utility class */
 .flex {
   display: flex;
 }
 
+/* Top header styles */
 #top-header {
   display: flex;
   justify-content: space-between;
   padding: 10px;
 }
 
+/* Top header link styles */
 #top-header a {
   text-decoration: none;
-  color: #2c3e50;
-  font-family: "Roboto", sans-serif;
+  color: #2c3e50; /* Dark gray-blue */
+  font-family: "Roboto", sans-serif; /* Secondary font */
 }
 
+/* Site name link styles */
 .siteName a {
   font-size: 1.2em;
   font-weight: 700;
 }
 
+/* Navigation styles */
 nav {
-  background: #34495e;
+  background: #34495e; /* Dark blue */
   color: #fff;
   margin-bottom: 20px;
 }
 
+/* Navigation list styles */
 nav ul {
   display: flex;
   justify-content: space-evenly;
@@ -44,21 +51,25 @@ nav ul {
   padding: 10px;
 }
 
+/* Navigation list item hover styles */
 nav ul li:hover {
   text-decoration: underline;
   font-weight: 600;
 }
 
+/* Wrapper styles */
 #wrapper {
-  background-color: #f2f2f2;
+  background-color: #f2f2f2; /* Light gray */
   max-width: 800px;
   margin: auto;
 }
 
+/* Heading styles */
 h2, h3 {
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto", sans-serif; /* Secondary font */
 }
 
+/* Hero section styles */
 .hero {
   margin-bottom: 40px;
   position: relative;
@@ -66,6 +77,7 @@ h2, h3 {
   margin: 0 auto;
 }
 
+/* Hero image styles */
 .hero img {
   display: block;
   width: 100%;
@@ -73,9 +85,10 @@ h2, h3 {
   margin: auto;
 }
 
+/* Action button styles */
 .action {
   background: rgba(255, 255, 255, 0.9);
-  color: #2980b9;
+  color: #2980b9; /* Light blue */
   position: absolute;
   top: 50px;
   left: 50%;
@@ -83,9 +96,10 @@ h2, h3 {
   padding: 10px;
 }
 
+/* Button styles */
 .button {
   color: #fff;
-  background: #27ae60;
+  background: #5d27ae; 
   width: fit-content;
   padding: 10px 20px;
   border: none;
@@ -93,20 +107,29 @@ h2, h3 {
   box-shadow: 2px 2px 5px #888;
 }
 
+/* Improved button text color for better accessibility */
+.button {
+  color: #fff; /* White */
+}
+
+/* List without bullets styles */
 ul.no-bullets {
   list-style-type: none;
   padding: 0;
 }
 
+/* Reviews list styles */
 .reviews ul {
   padding: 10px 20px;
   margin-bottom: 20px;
 }
 
+/* Reviews list item styles */
 .reviews ul li {
   padding: 3px;
 }
 
+/* Grid container styles */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -117,21 +140,25 @@ ul.no-bullets {
   margin-bottom: 40px;
 }
 
+/* Footer styles */
 footer {
   margin: 10px auto;
 }
 
 @media only screen and (min-width: 700px) {
+  /* Wrapper styles for larger screens */
   #wrapper {
     margin: 20px auto;
-    border: 5px solid #27ae60;
+    border: 5px solid #27ae60; /* Green */
     border-radius: 10px;
   }
 
+  /* Action button styles for larger screens */
   .action {
     padding: 20px;
   }
 
+  /* Desktop grid styles */
   .desktop-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -140,10 +167,12 @@ footer {
     margin: 10px;
   }
 
+  /* Upgrades section styles */
   .upgrades {
     grid-column-start: 1;
   }
 
+  /* Reviews section styles */
   .reviews {
     grid-column-start: 2;
     grid-row-start: 1;
