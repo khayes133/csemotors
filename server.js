@@ -34,7 +34,8 @@ const pool = new Pool({
   password: databaseUrl.password,
   port: databaseUrl.port,
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    require: true
   }
 });
 
@@ -65,7 +66,6 @@ app.use(function(req, res, next){
 app.use(cookieParser())
 
 app.use(utilities.checkJWTToken)
-
 
 /* ***********************
  * View Engine and Templates
