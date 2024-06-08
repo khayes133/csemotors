@@ -22,13 +22,17 @@ const cookieParser = require("cookie-parser")
  * PostgreSQL Connection
  *************************/
 const { Pool } = require('pg');
+const { URL } = require('url');
+
+// Parse DATABASE_URL
+const databaseUrl = new URL(process.env.DATABASE_URL);
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
+  user: databaseUrl.username,
+  host: databaseUrl.hostname,
+  database: databaseUrl.pathname.split('/')[1],
+  password: databaseUrl.password,
+  port: databaseUrl.port,
   ssl: {
     rejectUnauthorized: false
   }
