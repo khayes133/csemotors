@@ -6,7 +6,6 @@
  * Require Statements
  *************************/
 const session = require("express-session")
-const pool = require('./database/')
 const express = require("express")
 const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
@@ -20,8 +19,24 @@ const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 
 /* ***********************
+ * PostgreSQL Connection
+ *************************/
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+/* ***********************
  * Middleware
- * ************************/
+ ************************/
 app.use(session({
   store: new (require('connect-pg-simple')(session))({
     createTableIfMissing: true,
@@ -113,3 +128,14 @@ app.use(async (err, req, res, next) => {
     errors: null,
   })
 })
+
+/* ***********************
+ * Test Database Connection
+ *************************/
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Database connection error:', err.stack);
+  } else {
+    console.log('Database connected:', res.rows[0]);
+  }
+});
