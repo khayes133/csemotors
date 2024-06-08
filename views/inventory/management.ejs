@@ -1,0 +1,26 @@
+<% if (title) { %>
+    <div class="container-formall">
+        <h1 class="form-title"><%= title %></h1>
+    <%- messages() %>
+    </div>
+    <% } else {
+      res.redirect('/')
+    } %>
+
+
+ <div class="links">
+    <!-- Link to trigger the process to deliver the "add new classification" view -->
+    <a  href="/inv/add-classification">Add New Classification</a>
+</div>
+
+<div class="links">
+    <!-- Link to trigger the process to deliver the "add new inventory" view -->
+    <a  href="/inv/add-inventory">Add New Inventory</a>
+</div>
+
+<h2>Manage Inventory</h2>
+<p>Select a classification to see the items</p>
+<%- classificationList %>
+<table id="inventoryDisplay"></table>
+<noscript>JavaScript must be enabled to use this page.</noscript>
+<script src="../../js/inventory.js"></script>
