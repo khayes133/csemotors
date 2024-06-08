@@ -105,13 +105,13 @@ app.get("/errors/error/:errorStatus", async (req, res, next) => {
  * Local Server Information
  * Values from .env (environment) file
  *************************/
-const port = process.env.PORT
-const host = process.env.HOST
+const port = process.env.PORT || 3000; // Default port to 3000 if not set
+const host = process.env.HOST || '0.0.0.0'; // Default host to '0.0.0.0' if not set
 
 /* ***********************
  * Log statement to confirm server operation
  *************************/
-app.listen(port, () => {
+app.listen(port, host, () => {
   console.log(`app listening on ${host}:${port}`)
 })
 
