@@ -15,10 +15,11 @@ const session = require("express-session")
 const pool = require('./database/')
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
+const errorController = require('./controllers/errorController')
 
 /* ***********************
  * Middleware
- * ************************/
+ *************************/
 app.use(session({
   store: new (require('connect-pg-simple')(session))({
     createTableIfMissing: true,
@@ -87,12 +88,19 @@ app.use(async (req, res, next) => {
 app.use(async (err, req, res, next) => {
   let nav = await utilities.getNav()
   console.error(`Error at: "${req.originalUrl}": ${err.message}`)
-  if(err.status == 404) {message = err.message} else {message = 'Oops, looks like something went wrong! Maybe try a different route?'}
-  res.render("errors/error", {
-    title: err.status || 'Server Error',
-    message,
-    nav,
-  })
+  if(err.status == 404) {
+    res.status(404).render("errors/404", {
+      title: 'Page Not Found',
+      message: err.message,
+      nav,
+    })
+  } else {
+    res.status(500).render("errors/500", {
+      title: 'Server Error',
+      message: 'Oops, looks like something went wrong! Maybe try a different route?',
+      nav,
+    })
+  }
 })
 
 

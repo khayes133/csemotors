@@ -1,8 +1,6 @@
 // const accountModel = require("../models/account-model")
 const messageModel = require("../models/message-model")
 const utilities = require("../utilities/")
-// const bcrypt = require("bcryptjs")
-// const jwt = require("jsonwebtoken")
 require("dotenv").config()
 
 /* ****************************************
@@ -124,8 +122,6 @@ async function buildReplyMessage(req, res, next) {
     errors: null,
     account_firstname: messageData.account_firstname,
     account_lastname: messageData.account_lastname,
-    // message_subject: messageData.message_subject,
-    // message_body: messageData.message_body,
     message_to: messageData.message_to,
     message_from: messageData.message_from,
     message_subject: messageData.message_subject,
@@ -141,8 +137,6 @@ async function replyMessage(req, res) {
   const { message_to, message_from, message_subject, message_body, reply_message } = req.body
   const newSubject = `Re:${message_subject}`
   const newMessageBody = `${message_body} Re:${reply_message}`
-  // pass (message_to, message_from, message_subject, message_body) to model INSERT statement
-  // swap message_from and message_to to update sender and reciever info
   const regResult = await messageModel.sendNewMessage(message_from, message_to, newSubject, newMessageBody)
   if (regResult) {
     let archivedMessageCount = await messageModel.getArchivedMessageCountByAccountId(res.locals.accountData.account_id)

@@ -79,45 +79,47 @@ async function buildLogin(req, res, next) {
  *  Process login request (post /login)
  * ************************************ */
 async function accountLogin(req, res) {
-  let nav = await utilities.getNav();
-  const { account_email, account_password } = req.body;
+  let nav = await utilities.getNav()
+  const { account_email, account_password } = req.body
 
+  // gABE returns row count == 0 || == 1 
+  // ? 0 -> return error ? 1 return * accountData
+  const accountData = await accountModel.getAccountByEmail(account_email)
+
+  if (!accountData) {
+    req.flash("notice", "Please check your credentials and try again.")
+    res.status(400).render("account/login", {
+      title: "Login",
+      nav,
+      errors: null,
+      account_email,
+    })
+    // no account data? do not pass go, do not collect $200
+    return
+  }
   try {
-    const accountData = await accountModel.getAccountByEmail(account_email);
-    console.log('Account Data:', accountData);
-
-    if (!accountData) {
-      req.flash("notice", "Please check your credentials and try again.");
-      console.warn('No Account Data Found');
-      return res.status(400).render("account/login", {
-        title: "Login",
-        nav,
-        errors: null,
-        account_email,
-      });
-    }
-
     let match = await bcrypt.compare(account_password, accountData.account_password);
-    console.log('Password Match:', match);
-
     if (match) {
-      delete accountData.account_password;
+      // delete password from accountData array
+      // create jwt with payload containing remaining data
+      delete accountData.account_password
 
-      const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 });
-      res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 });
-      return res.redirect("/account/");
+      // use .env secret key to sign, expires in one hour
+      const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 })
+
+      // can only be passed through http requests, maximum age is 1 hour
+      res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 })
+      return res.redirect("/account/")
     } else {
-      throw new Error('Access forbidden');
+      throw new Error('Access forbidden')
     }
   } catch (error) {
-    console.error('Login Error:', error);
-    req.flash("notice", "Please check your credentials and try again.");
-    if (!res.headersSent) {
-      res.redirect("/account/login");
-    }
+    // return new Error('Access Forbidden')
+    req.flash("notice", "Please check your credentials and try again.")
+    res.redirect("/account/login")
+    return error
   }
 }
-
 
 /* ****************************************
 *  Deliver default account view 
