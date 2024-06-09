@@ -5,43 +5,20 @@
 /* ***********************
  * Require Statements
  *************************/
-const session = require("express-session")
 const express = require("express")
 const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
 const app = express()
-const static = require("./routes/static")
 const baseController = require("./controllers/baseController")
-const inventoryRoute = require("./routes/inventoryRoute")
-const accountRoute = require("./routes/accountRoute")
 const utilities = require("./utilities/")
+const session = require("express-session")
+const pool = require('./database/')
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 
 /* ***********************
- * PostgreSQL Connection
- *************************/
-const { Pool } = require('pg');
-const { URL } = require('url');
-
-// Parse DATABASE_URL
-const databaseUrl = new URL(process.env.DATABASE_URL);
-
-const pool = new Pool({
-  user: databaseUrl.username,
-  host: databaseUrl.hostname,
-  database: databaseUrl.pathname.split('/')[1],
-  password: databaseUrl.password,
-  port: databaseUrl.port,
-  ssl: {
-    rejectUnauthorized: false,
-    require: true
-  }
-});
-
-/* ***********************
  * Middleware
- ************************/
+ * ************************/
 app.use(session({
   store: new (require('connect-pg-simple')(session))({
     createTableIfMissing: true,
@@ -53,9 +30,6 @@ app.use(session({
   name: 'sessionId',
 }))
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-
 // Express Messages Middleware
 app.use(require('connect-flash')())
 app.use(function(req, res, next){
@@ -63,56 +37,47 @@ app.use(function(req, res, next){
   next()
 })
 
+// Use body parser
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+
+// Use cookie parser
 app.use(cookieParser())
 
+// Use token validation
 app.use(utilities.checkJWTToken)
 
 /* ***********************
- * View Engine and Templates
+ * View Engine and Template
  *************************/
 app.set("view engine", "ejs")
 app.use(expressLayouts)
-app.set("layout", "./layouts/layout") // not at views root
+app.set("layout", "./layouts/layout")
 
 /* ***********************
  * Routes
  *************************/
-app.use(static)
-// Index Route
+// static route
+app.use(require("./routes/static"))
+
+// index route
 app.get("/", utilities.handleErrors(baseController.buildHome))
-// Inventory routes
-app.use("/inv", utilities.handleErrors(inventoryRoute));
-// Account routes
-app.use("/account", utilities.handleErrors(accountRoute));
+
+// inventory route
+app.use("/inv", require("./routes/inventoryRoute"))
+
+// account route
+app.use("/account", require("./routes/accountRoute"))
+
+// inbox route
+app.use("/inbox", require("./routes/messageRoute"))
+
 // File Not Found Route - must be last route in list
-app.get("/errors/error/:errorStatus", async (req, res, next) => {
-  const errorStatus = req.params.errorStatus;
-  if (errorStatus === '500') {
-    // Simulate a 500 Internal Server Error
-    const error = new Error('Internal Server Error');
-    error.status = 500;
-    next(error);
-  } else {
-    // For other error statuses, return a generic error message
-    next({
-      status: errorStatus,
-      message: "Unknown error occurred. Please try again.",
-    });
-  }
-});
-
-/* ***********************
- * Local Server Information
- * Values from .env (environment) file
- *************************/
-const port = process.env.PORT || 3000; // Default port to 3000 if not set
-const host = process.env.HOST || '0.0.0.0'; // Default host to '0.0.0.0' if not set
-
-/* ***********************
- * Log statement to confirm server operation
- *************************/
-app.listen(port, host, () => {
-  console.log(`app listening on ${host}:${port}`)
+app.use(async (req, res, next) => {
+  next({
+    status: 404, 
+    message: 'This is not the page you are looking for... Go about your business... Move along...'
+  })
 })
 
 /* ***********************
@@ -122,24 +87,25 @@ app.listen(port, host, () => {
 app.use(async (err, req, res, next) => {
   let nav = await utilities.getNav()
   console.error(`Error at: "${req.originalUrl}": ${err.message}`)
-  if(err.status == 404 || err.status == 500)
-  { message = err.message} 
-  else {message = 'Oh no! There was a crash. Maybe try a different route?'}
+  if(err.status == 404) {message = err.message} else {message = 'Oops, looks like something went wrong! Maybe try a different route?'}
   res.render("errors/error", {
     title: err.status || 'Server Error',
     message,
     nav,
-    errors: null,
   })
 })
 
+
 /* ***********************
- * Test Database Connection
+ * Local Server Information
+ * Values from .env (environment) file
  *************************/
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err.stack);
-  } else {
-    console.log('Database connected:', res.rows[0]);
-  }
-});
+const port = process.env.PORT
+const host = process.env.HOST
+
+/* ***********************
+ * Log statement to confirm server operation
+ *************************/
+app.listen(port, () => {
+  console.log(`app listening on ${host}:${port}`)
+})

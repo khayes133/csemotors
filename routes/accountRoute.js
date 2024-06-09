@@ -1,58 +1,57 @@
 // Needed Resources 
-const express = require("express");
-const router = new express.Router();
-const utilities = require("../utilities/")
-const accountController = require("../controllers/accountController");
-const baseController = require("../controllers/baseController");
-const validate = require('../utilities/account-validation');
+const express = require("express")
+const router = new express.Router() 
+const accountController = require("../controllers/accountController")
+const { handleErrors, checkLogin } = require("../utilities")
+const regValidate = require('../utilities/account-validation')
 
+// Route to build default account view
+router.get("/", checkLogin, handleErrors(accountController.buildAccount));
 
-//Route for the path that will be sent when the "My Account" link is clicked
-router.get("/login/",accountController.buildLogin);
+// Route to build account register view
+router.get("/register", handleErrors(accountController.buildRegister));
 
-//Route for the path that will be sent when the "Registration" link is clicked
-router.get("/registration/",accountController.buildRegistration);
+// Process the registration data
+router.post(
+  "/register",
+  regValidate.registationRules(),
+  regValidate.checkRegData,
+  handleErrors(accountController.registerAccount)
+)
 
-//Route for the path that will be sent when the "Login" link is clicked
-router.get("",
-utilities.checkLogin,
-accountController.buildAccManag);
-
-//Registration POST
-router.post('/registration/',
-validate.registationRules(),
-validate.checkRegData,
-utilities.handleErrors(accountController.registerAccount))
+// Route to build account login view
+router.get("/login", handleErrors(accountController.buildLogin));
 
 // Process the login attempt
-router.post("/login/",
-utilities.handleErrors(accountController.loginAccount))
+router.post(
+  "/login",
+  regValidate.loginRules(),
+  regValidate.checkLoginData,
+  handleErrors(accountController.accountLogin)
+)
 
-//Error route
-router.get("errors/error/:errorStatus", baseController.buildError);
+// Route to build account login view
+router.get("/edit/:account_id", handleErrors(accountController.buildEditAccount));
 
-// Process update page
-router.get("/update/:account_id",
-utilities.checkLogin,
-utilities.handleErrors(accountController.buildAccUpdate)); 
+// Process the updated account information
+router.post(
+  "/accountupdate",
+  regValidate.updateAccountRules(),
+  regValidate.checkEditAccountData,
+  handleErrors(accountController.editAccountInfo)
+)
 
-//Route to update account information post
-router.post("/update",
-validate.updateInfoRules(),
-validate.checkUpdInformation,
-utilities.handleErrors(accountController.updateAccInfo));
+// Process the account password change
+router.post(
+  "/changepassword",
+  regValidate.changePasswordRules(),
+  regValidate.checkEditAccountData,
+  handleErrors(accountController.editAccountPassword)
+)
 
+router.get(
+  "/logout",
+  handleErrors(accountController.logoutAccount),
+)
 
-//Route to password change post
-router.post("/update/password",
-utilities.checkLogin,
-validate.updatePassRules(),
-validate.checkPassInformation,
-utilities.handleErrors(accountController.updatePassword));
-
-//Route to log out post
-router.post("/logout/", 
-utilities.handleErrors(accountController.logoutAcc));
-
-
-module.exports = router;
+module.exports = router

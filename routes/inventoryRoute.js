@@ -1,63 +1,90 @@
 // Needed Resources 
 const express = require("express")
 const router = new express.Router() 
-const utilities = require("../utilities/")
 const invController = require("../controllers/invController")
-const baseController = require("../controllers/baseController");
-const validate = require('../utilities/inventory-validation');
-const { route } = require("./static");
+const { handleErrors, checkIsPrivileged, checkAuthorization } = require("../utilities")
+const invValidate = require('../utilities/inventory-validation')
+const validate = require("../utilities/inventory-validation")
 
 // Route to build inventory by classification view
-router.get("/type/:classificationId", invController.buildByClassificationId);
+router.get("/type/:classificationId", handleErrors(invController.buildByClassificationId));
 
-//an appropriate route as part of the inventory route file (DETAIL)
-router.get("/detail/:carId", invController.buildByCarId);
+// Route to build inventory by vehicle view
+router.get("/detail/:invId", handleErrors(invController.buildByInvId));
 
-//Error route
-router.get("errors/error/:errorStatus", baseController.buildError);
+// MANAGEMENT ROUTES ** NeEdS tO Be ChAnGeD **
+// Route to build inventory index
+router.get(
+  "/", 
+  checkAuthorization,
+  handleErrors(invController.buildManagement)
+)
 
-//Management route
-router.get("/", utilities.checkLogin, invController.buildManagement);
+// Route to build add classification view
+router.get(
+  "/addclass", 
+  checkAuthorization,
+  handleErrors(invController.buildAddclass)
+)
 
-//Add classification route
-router.get("/add-classification", utilities.checkAccountType, invController.buildClassificationForm);
+// Process the new classification data
+router.post(
+  "/addclass",
+  checkAuthorization,
+  invValidate.classRules(),
+  invValidate.checkClassData,
+  handleErrors(invController.addClass)
+)
 
-//Add new car route
-router.get("/add-inventory", utilities.checkAccountType, invController.buildNewCarForm);
+// Route to build add vehicle view
+router.get("/addvehicle", 
+  checkAuthorization,
+  handleErrors(invController.buildAddvehicle),
+)
 
-//Add new route for get inventory
-router.get("/getInventory/:classification_id", utilities.handleErrors(invController.getInventoryJSON))
+// Process the new vehicle data
+router.post(
+  "/addvehicle",
+  checkAuthorization,
+  invValidate.vehicleRules(),
+  invValidate.checkVehicleData,
+  handleErrors(invController.addVehicle),
+)
 
-//Add path to modify 
-router.get("/edit/:inventory_id", utilities.checkAccountType, utilities.handleErrors(invController.editController))
+// Build inventory management table inventory view
+router.get("/getInventory/:classification_id", handleErrors(invController.getInventoryJSON))
 
-// Add path to delete
-router.get("/delete/:inventory_id", utilities.checkAccountType, utilities.handleErrors(invController.buildConfirmDelete))
+// Build edit vehicle information view
+router.get(
+  "/edit/:inv_id", 
+  checkAuthorization,
+  handleErrors(invController.buildVehicleEdit)
+)
 
-router.post("/delete/:inventory_id",
-utilities.checkAccountType,
-utilities.handleErrors(invController.deleteInventory))
+// Post route /update
+router.post(
+  "/update",
+  checkAuthorization,
+  invValidate.vehicleRules(),
+  invValidate.checkVehicleUpdateData,
+  handleErrors(invController.updateVehicle)
+)
 
-//Add route to post update
-router.post("/edit-inventory",
-utilities.checkAccountType,
-validate.addInventoryValidation(),
-validate.checkUpdateData,
-utilities.handleErrors(invController.updateInventory))
+// Build vehicle deletion confirmation view
+router.get(
+  "/delete/:inv_id", 
+  checkAuthorization,
+  handleErrors(invController.buildVehicleDeleteConfirm)
+)
 
+// Post route /delete
+router.post(
+  "/delete", 
+  checkAuthorization,
+  handleErrors(invController.deleteVehicle)
+)
 
-//Add classification POST
-router.post('/add-classification/',
-utilities.checkAccountType,
-validate.namecharacteristics(),
-validate.checkClassData, 
-utilities.handleErrors(invController.addClassification));
-
-//Add vehicle POST
-router.post('/add-inventory',
-utilities.checkAccountType,
-validate.addInventoryValidation(),
-validate.checkInvData,
-utilities.handleErrors(invController.addVehicle));
+// Route to build broken page
+router.get("/broken", handleErrors(invController.buildBrokenPage));
 
 module.exports = router;
